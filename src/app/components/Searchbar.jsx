@@ -7,7 +7,7 @@ import { CiSearch } from "react-icons/ci";
 const searchSchema = z.object({
   query: z.string().min(1, "Search cannot be empty"),
 });
-const width= "w-full";
+
 function Searchbar({width}) {
   const {
     register,
@@ -23,7 +23,7 @@ function Searchbar({width}) {
     reset();
   };
   return (
-    <div className={`${width} flex`}>
+    <div className={` w-full flex`}>
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="flex items-center justify-center space-x-2 w-full"
