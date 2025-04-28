@@ -15,9 +15,9 @@ const vendorRegisterSchema = z
       message: "Please enter a valid email address",
     }),
     primaryPhone: z.string().min(6, "Must be a minimum of 6 characters"),
-    secondaryPhone: z.string().min(6, "Must be a minimum of 6 characters"),
+    secondaryPhone: z.string().min(6, "Must be a minimum of 6 characters").optional(),
     primaryAddress: z.string().min(6, "Must be a minimum of 6 characters"),
-    secondaryAddress: z.string().min(6, "Must be a minimum of 6 characters"),
+    secondaryAddress: z.string().min(6, "Must be a minimum of 6 characters").optional(),
     password: z
       .string()
       .min(8, "Password must be at least 8 characters long")
@@ -29,11 +29,14 @@ const vendorRegisterSchema = z
         "Password must contain at least one special character"
       ),
 
-    confirmPassword: z.string(),
+    passwordConfirm: z.string(),
   })
-  .refine((data) => data.password === data.confirmPassword, {
+  .refine((data) => data.password === data.passwordConfirm, {
     message: "Passwords do not match",
     path: ["confirmPassword"],
+    city: z.string().min(1, "It must not be empty"),
+    region: z.string().min(1, "It must not be empty"),
+    country: z.string().min(1, "It must not be empty"),
     businessName: z.string().min(2, "Must be atleast 2 characters"),
     businessCategoryId: z
       .number()
@@ -83,52 +86,39 @@ function VendorRegister() {
           Business information
         </h1>
         <input type="hidden" value="vendor" name="role" />
-        <div className="my-5">
-          <label htmlFor="firstName" className="text-md text-[#5A607F]">
-            First Name
-          </label>
-          <input
-            {...register("firstName")}
-            placeholder="Emmanuel"
-            type="text"
-            name="firstName"
-            id="firstName"
-            className="w-full py-3 px-4 border-1 border-solid border-[#D9E1EC] placeholder-[#A1A7C4] text-black rounded-lg"
-          />
-          {errors.firstName && (
-            <span className="text-red-500">{errors.firstName.message}</span>
-          )}
-        </div>
-        <div className="my-5">
-          <label htmlFor="lastName" className="text-md text-[#5A607F]">
-            Last Name
-          </label>
-          <input
-            {...register("lastName")}
-            placeholder="Abraham"
-            name="lastName"
-            type="text"
-            id="lastName"
-            className="w-full py-3 px-4 border-1 border-solid border-[#D9E1EC] placeholder-[#A1A7C4] text-black rounded-lg"
-          />
-          {errors.lastName && (
-            <span className="text-red-500">{errors.lastName.message}</span>
-          )}
-        </div>
-        <div className="my-5">
-          <label htmlFor="email" className="text-md text-[#5A607F]">
-            Email
-          </label>
-          <input
-            {...register("email")}
-            placeholder="emmanuel@gmail.com"
-            type="email"
-            id="email"
-            className="w-full py-3 px-4 border-1 border-solid border-[#D9E1EC] placeholder-[#A1A7C4] text-black rounded-lg"
-          />
-          {errors.email && (
-            <span className="text-red-500">{errors.email.message}</span>
-          )}
+        <div className="grid grid-cols-12 grid-rows-12 gap-x-5">
+          <div className="my-5 col-span-12 row-span-6 lg:col-span-6 lg:row-span-12">
+            <label htmlFor="firstName" className="text-md text-[#5A607F]">
+              First Name
+            </label>
+            <input
+              {...register("firstName")}
+              placeholder="Enter First name"
+              type="text"
+              name="firstName"
+              id="firstName"
+              className="w-full py-3 px-4 border-1 border-solid border-[#D9E1EC] placeholder-[#A1A7C4] text-black rounded-lg"
+            />
+            {errors.firstName && (
+              <span className="text-red-500">{errors.firstName.message}</span>
+            )}
+          </div>
+          <div className="my-5 col-span-12 row-span-6 lg:col-span-6 lg:row-span-12">
+            <label htmlFor="lastName" className="text-md text-[#5A607F]">
+              Last Name
+            </label>
+            <input
+              {...register("lastName")}
+              placeholder="Enter Last name"
+              name="lastName"
+              type="text"
+              id="lastName"
+              className="w-full py-3 px-4 border-1 border-solid border-[#D9E1EC] placeholder-[#A1A7C4] text-black rounded-lg"
+            />
+            {errors.lastName && (
+              <span className="text-red-500">{errors.lastName.message}</span>
+            )}
+          </div>
         </div>
         <div className="flex flex-col lg:flex-row gap-x-5">
           <div className="my-5 lg:w-1/2">
@@ -137,7 +127,7 @@ function VendorRegister() {
             </label>
             <input
               {...register("primaryPhone")}
-              placeholder="+2340915257910"
+              placeholder="Enter phone number"
               type="tel"
               id="primaryPhone"
               name="primaryPhone"
@@ -155,7 +145,7 @@ function VendorRegister() {
             </label>
             <input
               {...register("secondaryPhone")}
-              placeholder="+2340915257910"
+              placeholder="Enter phone number"
               type="tel"
               name="secondaryPhone"
               id="secondaryPhone"
@@ -169,11 +159,29 @@ function VendorRegister() {
           </div>
         </div>
         <div className="my-5">
+          <label htmlFor="email" className="text-md text-[#5A607F]">
+            Email Address
+          </label>
+          <input
+            {...register("email")}
+            placeholder="Enter your email"
+            name="email"
+            type="email"
+            id="email"
+            className="w-full py-3 px-4 border-1 border-solid border-[#D9E1EC] placeholder-[#A1A7C4] text-black rounded-lg"
+          />
+          {errors.email && (
+            <span className="text-red-500">{errors.email.message}</span>
+          )}
+        </div>
+
+        <div className="my-5">
           <label htmlFor="primaryAddress" className="text-md text-[#5A607F]">
             Primary Address
           </label>
           <textarea
             {...register("primaryAddress")}
+            id="primaryAddress"
             placeholder="No 17 Adankolo road, lokogoma, Lokoja, Kogi state."
             name="primaryAddress"
             className="w-full py-3 px-4 border-1 border-solid border-[#D9E1EC] placeholder-[#A1A7C4] text-black rounded-lg"
@@ -190,6 +198,7 @@ function VendorRegister() {
           </label>
           <textarea
             {...register("secondaryAddress")}
+            id="secondaryAddress"
             placeholder="No 17 Adankolo road, lokogoma, Lokoja, Kogi state."
             name="secondaryAddress"
             className="w-full py-3 px-4 border-1 border-solid border-[#D9E1EC] placeholder-[#A1A7C4] text-black rounded-lg"
@@ -201,11 +210,54 @@ function VendorRegister() {
           )}
         </div>
         <div className="my-5">
-          <label className="text-md text-[#5A607F]">Password</label>
+          <label htmlFor="city" className="text-md text-[#5A607F]">
+            City
+          </label>
+          <input
+            {...register("city")}
+            type="text"
+            id="city"
+            name="city"
+            placeholder="Enter city"
+            className="w-full py-3 px-4 border-1 border-solid border-[#D9E1EC] placeholder-[#A1A7C4] text-black rounded-lg"
+          />
+        </div>
+        <div className="my-5">
+          <label htmlFor="region" className="text-md text-[#5A607F]">
+            Region
+          </label>
+          <input
+            {...register("region")}
+            type="text"
+            id="region"
+            name="region"
+            placeholder="Enter region"
+            className="w-full py-3 px-4 border-1 border-solid border-[#D9E1EC] placeholder-[#A1A7C4] text-black rounded-lg"
+          />
+        </div>
+        <div className="my-5">
+          <label htmlFor="country" className="text-md text-[#5A607F]">
+            Country
+          </label>
+          <input
+            {...register("country")}
+            type="text"
+            id="country"
+            name="country"
+            placeholder="Enter country"
+            className="w-full py-3 px-4 border-1 border-solid border-[#D9E1EC] placeholder-[#A1A7C4] text-black rounded-lg"
+          />
+        </div>
+        <div className="my-5">
+          <label htmlFor="password" className="text-md text-[#5A607F]">
+            Password
+          </label>
           <input
             type="password"
+            id="password"
             {...register("password")}
             name="password"
+            placeholder="Enter password"
             className="w-full py-3 px-4 border-1 border-solid border-[#D9E1EC] placeholder-[#A1A7C4] text-black rounded-lg"
           />
           {errors.password && (
@@ -214,15 +266,19 @@ function VendorRegister() {
         </div>
 
         <div className="my-5">
-          <label className="text-md text-[#5A607F]">Confirm Password</label>
+          <label htmlFor="passwordConfirm" className="text-md text-[#5A607F]">
+            Confirm Password
+          </label>
           <input
             type="password"
-            {...register("confirmPassword")}
-            name="confirmPassword"
+            {...register("passwordConfirm")}
+            id="passwordConfirm"
+            placeholder="Confirm password"
+            name="passwordConfirm"
             className="w-full py-3 px-4 border-1 border-solid border-[#D9E1EC] placeholder-[#A1A7C4] text-black rounded-lg"
           />
-          {errors.confirmPassword && (
-            <p className="text-red-500">{errors.confirmPassword.message}</p>
+          {errors.passwordConfirm && (
+            <p className="text-red-500">{errors.passwordConfirm.message}</p>
           )}
         </div>
         <div className="my-5">
@@ -231,9 +287,10 @@ function VendorRegister() {
           </label>
           <input
             {...register("businessName")}
-            placeholder="Emmanuel Abraham"
+            placeholder="Enter Business Name"
             type="text"
-            id="fullName"
+            name="businessName"
+            id="businessName"
             className="w-full py-3 px-4 border-1 border-solid border-[#D9E1EC] placeholder-[#A1A7C4] text-black rounded-lg"
           />
           {errors.businessName && (
@@ -253,7 +310,8 @@ function VendorRegister() {
             {...register("businessRegNum")}
             placeholder="emmanuel@gmail.com"
             type="email"
-            id="email"
+            id="businessRegNum"
+            name="businessRegNum"
             className="w-full py-3 px-4 border-1 border-solid border-[#D9E1EC] placeholder-[#A1A7C4] text-black rounded-lg"
           />
           {errors.businessRegNum && (
@@ -277,11 +335,27 @@ function VendorRegister() {
               id="image-input"
               {...register("image")}
               className="hidden"
+              name="businessLogo"
               accept="image/png, image/jpg, image/jpeg, image/webp, image/svg+xml"
             />
           </label>
           {errors.image && (
             <span className="text-red-500">{errors.image.message}</span>
+          )}
+        </div>
+        <div className="mt-5">
+          <label htmlFor="nin" className="text-md text-[#5A607F]">
+            NIN
+          </label>
+          <input
+            {...register("nin")}
+            type="text"
+            id="nin"
+            name="nin"
+            className="w-full py-3 px-4 border-1 border-solid border-[#D9E1EC] placeholder-[#A1A7C4] text-black rounded-lg"
+          />
+          {errors.nin && (
+            <span className="text-red-500">{errors.nin.message}</span>
           )}
         </div>
         <button
@@ -290,7 +364,7 @@ function VendorRegister() {
           rounded-2xl mt-5 max-w-177 mx-auto block cursor-pointer
           "
         >
-          <Link href="/">Complete</Link>
+          Complete
         </button>
       </form>
     </div>

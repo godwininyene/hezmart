@@ -4,36 +4,41 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import Link from 'next/link';
+import axios from '../../lib/axios';
 
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
-const customerRegisterSchema = z.object({
-  firstName: z.string().min(2, "Must be atleast 2 characters"),
-  lastName: z.string().min(2, "Must be atleast 2 characters"),
-  email: z.string().min(6, "Invalid email address").regex(emailRegex, {
-    message: "Please enter a valid email address",
-  }),
-  primaryPhone: z.string().min(6, "Must be a minimum of 6 characters"),
-  secondaryPhone: z.string().min(6, "Must be a minimum of 6 characters"),
-  primaryAddress: z.string().min(6, "Must be a minimum of 6 characters"),
-  secondaryAddress: z.string().min(6, "Must be a minimum of 6 characters"),
-  city: z.string().min(1, "It must not be empty"),
-  region: z.string().min(1, "It must not be empty"),
-  country: z.string().min(1, "It must not be empty"),
-  password: z
+const customerRegisterSchema = z
+  .object({
+    firstName: z.string().min(2, "Must be atleast 2 characters"),
+    lastName: z.string().min(2, "Must be atleast 2 characters"),
+    email: z.string().min(6, "Invalid email address").regex(emailRegex, {
+      message: "Please enter a valid email address",
+    }),
+    primaryPhone: z.string().min(6, "Must be a minimum of 6 characters"),
+    secondaryPhone: z.string().min(6, "Must be a minimum of 6 characters").optional(),
+    primaryAddress: z.string().min(6, "Must be a minimum of 6 characters"),
+    secondaryAddress: z.string().min(6, "Must be a minimum of 6 characters").optional(),
+    city: z.string().min(1, "It must not be empty"),
+    region: z.string().min(1, "It must not be empty"),
+    country: z.string().min(1, "It must not be empty"),
+    password: z
       .string()
       .min(8, "Password must be at least 8 characters long")
       .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
       .regex(/[a-z]/, "Password must contain at least one lowercase letter")
       .regex(/[0-9]/, "Password must contain at least one number")
-      .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character"),
-      
-    confirmPassword: z.string(),
+      .regex(
+        /[^A-Za-z0-9]/,
+        "Password must contain at least one special character"
+      ),
+
+    passwordConfirm: z.string(),
   })
-  .refine((data) => data.password === data.confirmPassword, {
+  .refine((data) => data.password === data.passwordConfirm, {
     message: "Passwords do not match",
     path: ["confirmPassword"],
-});
+  });
 
 function CustomerRegister() {
   const {
@@ -43,13 +48,18 @@ function CustomerRegister() {
   } = useForm({
     resolver: zodResolver(customerRegisterSchema),
   });
-  const onSubmit = (data) => {
-    console.log("Form submitted:", data);
+  const submit = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const response = await axios.post("/api/v1/users/signup", formData);
+    console.log(response);
   };
 
   return (
     <div className="px-4 mt-9 border-solid border-2 border-gray-200 rounded-lg py-5 max-w-238">
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form 
+      
+      onSubmit={submit}>
         <h1 className="text-xl text-[#111111] font-semibold">
           Personal information
         </h1>
@@ -232,19 +242,19 @@ function CustomerRegister() {
         </div>
 
         <div className="my-5">
-          <label htmlFor="confirmPassword" className="text-md text-[#5A607F]">
+          <label htmlFor="passwordConfirm" className="text-md text-[#5A607F]">
             Confirm Password
           </label>
           <input
             type="password"
-            {...register("confirmPassword")}
-            id="confirmPassword"
-            name="confirmPassword"
+            {...register("passwordConfirm")}
+            id="passwordConfirm"
+            name="passwordConfirm"
             placeholder="Confirm password"
             className="w-full py-3 px-4 border-1 border-solid border-[#D9E1EC] placeholder-[#A1A7C4] text-black rounded-lg"
           />
-          {errors.confirmPassword && (
-            <p className="text-red-500">{errors.confirmPassword.message}</p>
+          {errors.passwordConfirm && (
+            <p className="text-red-500">{errors.passwordConfirm.message}</p>
           )}
         </div>
         <button
@@ -253,7 +263,7 @@ function CustomerRegister() {
           rounded-2xl mt-5 max-w-177 mx-auto block cursor-pointer
           "
         >
-          <Link href="/">Complete</Link>
+          Complete
         </button>
       </form>
     </div>
