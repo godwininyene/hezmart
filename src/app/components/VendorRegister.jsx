@@ -287,7 +287,7 @@ function VendorRegister() {
         <button
           type="submit"
           className="bg-gradient-to-r from-[#E67002] to-[#992002] text-white text-2xl w-full py-3
-          rounded-2xl mt-5 max-w-177 mx-auto block
+          rounded-2xl mt-5 max-w-177 mx-auto block cursor-pointer
           "
         >
           <Link href="/">Complete</Link>

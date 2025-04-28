@@ -4,7 +4,7 @@ import VendorRegister from '../components/VendorRegister';
 function page() {
   return (
     <div className="max-w-[1440px] w-screen lg:px-20 lg:py-6 p-4">
-      <HezmartBreadcrumb />
+      <HezmartBreadcrumb href="sell" text="Sell on Hezmart" />
       <VendorRegister />
     </div>
   );

@@ -5,7 +5,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 
-export function HezmartBreadcrumb() {
+export function HezmartBreadcrumb({href, text}) {
   return (
     <Breadcrumb className="flex gap-4 items-center text-sm mt-5 items-center">
       <BreadcrumbItem>
@@ -15,11 +15,11 @@ export function HezmartBreadcrumb() {
       </BreadcrumbItem>
       <BreadcrumbSeparator />
       <BreadcrumbItem>
-        <BreadcrumbLink href="/sell">Sell on Hezmart</BreadcrumbLink>
+        <BreadcrumbLink href={`/${href}`}>{text}</BreadcrumbLink>
       </BreadcrumbItem>
       <BreadcrumbSeparator />
       <BreadcrumbItem>
-        <BreadcrumbLink href="/sell/register" className="font-semibold">
+        <BreadcrumbLink href={`/${href}/register`} className="font-semibold">
           Register
         </BreadcrumbLink>
       </BreadcrumbItem>
