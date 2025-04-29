@@ -5,11 +5,6 @@ const geistSans = Geist({
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
 export const metadata = {
   title: "Hezmart Password Reset",
   icons: {
@@ -21,7 +16,7 @@ export default function CustomerRegisterLayout({ children }) {
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} 
+        className={`${geistSans.className}
         antialiased h-screen w-screen flex items-center justify-center`}
       >
         {children}

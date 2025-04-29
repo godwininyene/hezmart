@@ -33,7 +33,7 @@ function Login() {
         className="
         text-3xl text-center font-bold text-[#111111] mt-8 mb-2"
       >
-        Password Reset
+        Forgot Password?
       </h1>
       <p className="text-base text-[#5A607F] text-center">
         We Will Help You Reset your Password

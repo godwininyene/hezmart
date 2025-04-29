@@ -32,7 +32,7 @@
     ".next/types/**/*.ts",
     "**/*.ts",
     "**/*.tsx"
-, "src/app/password-reset/page.jsx", "src/app/password-reset/layout.jsx"  ],
+, "src/app/forgot-password/page.jsx", "src/app/forgot-password/layout.jsx"  ],
   "exclude": [
     "node_modules"
   ]
