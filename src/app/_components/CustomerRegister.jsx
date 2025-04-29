@@ -4,267 +4,279 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import Link from 'next/link';
+import InputField from './common/InputField';
+import SelectField from './common/SelectField';
+import Button from './common/Button';
 import axios from '../../lib/axios';
 
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
 const customerRegisterSchema = z
   .object({
-    firstName: z.string().min(2, "Must be atleast 2 characters"),
-    lastName: z.string().min(2, "Must be atleast 2 characters"),
-    email: z.string().min(6, "Invalid email address").regex(emailRegex, {
-      message: "Please enter a valid email address",
-    }),
-    primaryPhone: z.string().min(6, "Must be a minimum of 6 characters"),
-    secondaryPhone: z.string().min(6, "Must be a minimum of 6 characters").optional(),
-    primaryAddress: z.string().min(6, "Must be a minimum of 6 characters"),
-    secondaryAddress: z.string().min(6, "Must be a minimum of 6 characters").optional(),
-    city: z.string().min(1, "It must not be empty"),
-    region: z.string().min(1, "It must not be empty"),
-    country: z.string().min(1, "It must not be empty"),
+    firstName: z.string().trim().min(2, "Must be at least 2 characters"),
+    lastName: z.string().trim().min(2, "Must be at least 2 characters"),
+    email: z.string().trim().email("Please enter a valid email address"),
+    primaryPhone: z.string().trim().min(6, "Must be a minimum of 6 characters"),
+    secondaryPhone: z.string().trim().min(6, "Must be a minimum of 6 characters").optional(),
+    primaryAddress: z.string().trim().min(6, "Must be a minimum of 6 characters"),
+    secondaryAddress: z.string().trim().min(6, "Must be a minimum of 6 characters").optional(),
+    city: z.string().trim().min(1, "It must not be empty"),
+    region: z.string().trim().min(1, "It must not be empty"),
+    country: z.string().trim().min(1, "It must not be empty"),
     password: z
       .string()
-      .min(8, "Password must be at least 8 characters long")
-      .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-      .regex(/[a-z]/, "Password must contain at least one lowercase letter")
-      .regex(/[0-9]/, "Password must contain at least one number")
-      .regex(
-        /[^A-Za-z0-9]/,
-        "Password must contain at least one special character"
-      ),
-
+      .min(8, "Password must be at least 8 characters long"),
+      // .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+      // .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+      // .regex(/[0-9]/, "Password must contain at least one number"),
     passwordConfirm: z.string(),
   })
   .refine((data) => data.password === data.passwordConfirm, {
     message: "Passwords do not match",
-    path: ["confirmPassword"],
+    path: ["passwordConfirm"],
   });
 
 function CustomerRegister() {
+
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    setError,
+    formState: { errors, isSubmitting },
+    watch,
+    control, 
+    getValues,
   } = useForm({
     resolver: zodResolver(customerRegisterSchema),
+    defaultValues: {
+      firstName: '',
+      lastName: '',
+      email: '',
+      primaryPhone: '',
+      secondaryPhone: '',
+      primaryAddress: '',
+      secondaryAddress: '',
+      city: '',
+      region: '',
+      country: '', 
+      password: '',
+      passwordConfirm: '',
+    },
+    mode: 'onTouched',
   });
-  const submit = async (e) => {
+
+    // Use watch to monitor ALL fields
+    const watchAllFields = watch();
+
+
+  React.useEffect(() => {
+    console.log('Current errors:', errors);
+    console.log('Form values:', getValues()); 
+  }, [errors]);
+
+  
+
+  const onSubmit = async (e) => {
     e.preventDefault();
-    const formData = new FormData(e.target);
-    const response = await axios.post("/api/v1/users/signup", formData);
-    console.log(response);
+    const formData = new FormData(e.target)
+    try {
+      const response = await axios.post('/api/v1/users/signup', formData);
+      
+      if (response.data.status === 'success') {
+        console.log("User successfully registered");
+        // Redirect to email confirmation page
+        router.push('/email-confirmation');
+      }
+    } catch (err) {
+      console.log('error ', err)
+      if (err.response?.data?.errors) {
+        // Handle field-specific validation errors from backend
+        const backendErrors = err.response.data.errors;
+        // Loop through all backend errors and set them to the appropriate fields
+        Object.entries(backendErrors).forEach(([fieldName, errorMessage]) => {
+          setError(fieldName, {
+            type: 'server',
+            message: errorMessage 
+          });
+        });
+      } else if (err.response?.data?.message) {
+        // Handle non-field specific error message
+        setError('root.serverError', {
+          type: 'server',
+          message: err.response.data.message
+        });
+      } else {
+        // Handle unexpected errors
+        setError('root.serverError', {
+          type: 'server',
+          message: 'An unexpected error occurred. Please try again.'
+        });
+        console.log('Unexpected Error:', err);
+      }
+    }
   };
 
   return (
     <div className="px-4 mt-9 border-solid border-2 border-gray-200 rounded-lg py-5 max-w-238">
-      <form 
-      
-      onSubmit={submit}>
+      <form  
+        onSubmit={(e) => {
+          e.preventDefault(); 
+          handleSubmit(onSubmit)(e);
+        }}
+      >
         <h1 className="text-xl text-[#111111] font-semibold">
           Personal information
-        </h1>
-        <input type="hidden" value="customer" />
+        </h1> 
+        {/* Display root/server errors */}
+         {errors.root?.serverError && (
+          <div className="mb-4 p-4 text-red-700 bg-red-100 rounded-lg">
+            {errors.root.serverError.message}
+          </div>
+        )}
         <div className="grid grid-cols-12 grid-rows-12 gap-x-5">
           <div className="my-5 col-span-12 row-span-6 lg:col-span-6 lg:row-span-12">
-            <label htmlFor="firstName" className="text-md text-[#5A607F]">
-              First Name
-            </label>
-            <input
-              {...register("firstName")}
-              placeholder="Enter First name"
-              type="text"
+            <InputField
+              label="First Name"
               name="firstName"
-              id="firstName"
-              className="w-full py-3 px-4 border-1 border-solid border-[#D9E1EC] placeholder-[#A1A7C4] text-black rounded-lg"
+              register={register}
+              placeholder="Enter First name"
+              error={errors.firstName?.message}
             />
-            {errors.firstName && (
-              <span className="text-red-500">{errors.firstName.message}</span>
-            )}
           </div>
           <div className="my-5 col-span-12 row-span-6 lg:col-span-6 lg:row-span-12">
-            <label htmlFor="lastName" className="text-md text-[#5A607F]">
-              Last Name
-            </label>
-            <input
-              {...register("lastName")}
-              placeholder="Enter Last name"
+            <InputField
+              label="Last Name"
               name="lastName"
-              type="text"
-              id="lastName"
-              className="w-full py-3 px-4 border-1 border-solid border-[#D9E1EC] placeholder-[#A1A7C4] text-black rounded-lg"
+              register={register}
+              placeholder="Enter Last name"
+              error={errors.lastName?.message}
             />
-            {errors.lastName && (
-              <span className="text-red-500">{errors.lastName.message}</span>
-            )}
           </div>
         </div>
+        
         <div className="flex flex-col lg:flex-row gap-x-5">
           <div className="my-5 lg:w-1/2">
-            <label htmlFor="primaryPhone" className="text-md text-[#5A607F]">
-              Phone Number
-            </label>
-            <input
-              {...register("primaryPhone")}
+            <InputField
+              label="Phone Number"
+              name="primaryPhone"
+              register={register}
               placeholder="Enter phone number"
               type="tel"
-              id="primaryPhone"
-              name="primaryPhone"
-              className="w-full py-3 px-4 border-1 border-solid border-[#D9E1EC] placeholder-[#A1A7C4] text-black rounded-lg"
+              error={errors.primaryPhone?.message}
             />
-            {errors.primaryPhone && (
-              <span className="text-red-500">
-                {errors.primaryPhone.message}
-              </span>
-            )}
           </div>
           <div className="my-5 lg:w-1/2">
-            <label htmlFor="secondaryPhone" className="text-md text-[#5A607F]">
-              Phone Number 2
-            </label>
-            <input
-              {...register("secondaryPhone")}
+            <InputField
+              label="Phone Number 2 (Optional)"
+              name="secondaryPhone"
+              register={register}
               placeholder="Enter phone number"
               type="tel"
-              name="secondaryPhone"
-              id="secondaryPhone"
-              className="w-full py-3 px-4 border-1 border-solid border-[#D9E1EC] placeholder-[#A1A7C4] text-black rounded-lg"
+              error={errors.secondaryPhone?.message}
+              isRequired={false}
             />
-            {errors.secondaryPhone && (
-              <span className="text-red-500">
-                {errors.secondaryPhone.message}
-              </span>
-            )}
           </div>
         </div>
+        
         <div className="my-5">
-          <label htmlFor="email" className="text-md text-[#5A607F]">
-            Email Address
-          </label>
-          <input
-            {...register("email")}
+          <InputField
+            label="Email Address"
+            name="email"
+            register={register}
             placeholder="Enter your email"
             type="email"
-            id="email"
-            className="w-full py-3 px-4 border-1 border-solid border-[#D9E1EC] placeholder-[#A1A7C4] text-black rounded-lg"
+            error={errors.email?.message}
           />
-          {errors.email && (
-            <span className="text-red-500">{errors.email.message}</span>
-          )}
         </div>
+        
         <div className="my-5">
-          <label htmlFor="primaryAddress" className="text-md text-[#5A607F]">
-            Primary Address
-          </label>
-          <textarea
-            {...register("primaryAddress")}
-            id="primaryAddress"
-            placeholder="No 17 Adankolo road, lokogoma, Lokoja, Kogi state."
+          <InputField
+            label="Primary Address"
             name="primaryAddress"
-            className="w-full py-3 px-4 border-1 border-solid border-[#D9E1EC] placeholder-[#A1A7C4] text-black rounded-lg"
-          />
-          {errors.primaryAddress && (
-            <span className="text-red-500">
-              {errors.primaryAddress.message}
-            </span>
-          )}
-        </div>
-        <div className="my-5">
-          <label htmlFor="secondaryAddress" className="text-md text-[#5A607F]">
-            Secondary Address
-          </label>
-          <textarea
-            {...register("secondaryAddress")}
-            id="secondaryAddress"
+            register={register}
             placeholder="No 17 Adankolo road, lokogoma, Lokoja, Kogi state."
+            as="textarea"
+            error={errors.primaryAddress?.message}
+          />
+        </div>
+        
+        <div className="my-5">
+          <InputField
+            label="Secondary Address (Optional)"
             name="secondaryAddress"
-            className="w-full py-3 px-4 border-1 border-solid border-[#D9E1EC] placeholder-[#A1A7C4] text-black rounded-lg"
+            register={register}
+            placeholder="No 17 Adankolo road, lokogoma, Lokoja, Kogi state."
+            as="textarea"
+            error={errors.secondaryAddress?.message}
+            isRequired={false}
           />
-          {errors.secondaryAddress && (
-            <span className="text-red-500">
-              {errors.secondaryAddress.message}
-            </span>
-          )}
         </div>
+        
         <div className="my-5">
-          <label htmlFor="city" className="text-md text-[#5A607F]">
-            City
-          </label>
-          <input
-            {...register("city")}
-            type="text"
-            id="city"
+          <InputField
+            label="City"
             name="city"
+            register={register}
             placeholder="Enter city"
-            className="w-full py-3 px-4 border-1 border-solid border-[#D9E1EC] placeholder-[#A1A7C4] text-black rounded-lg"
+            error={errors.city?.message}
           />
         </div>
+        
         <div className="my-5">
-          <label htmlFor="region" className="text-md text-[#5A607F]">
-            Region
-          </label>
-          <input
-            {...register("region")}
-            type="text"
-            id="region"
+          <InputField
+            label="Region"
             name="region"
+            register={register}
             placeholder="Enter region"
-            className="w-full py-3 px-4 border-1 border-solid border-[#D9E1EC] placeholder-[#A1A7C4] text-black rounded-lg"
+            error={errors.region?.message}
           />
         </div>
+        
         <div className="my-5">
-          <label htmlFor="country" className="text-md text-[#5A607F]">
-            Country
-          </label>
-          <input
-            {...register("country")}
-            type="text"
-            id="country"
+          <SelectField
             name="country"
-            placeholder="Enter country"
-            className="w-full py-3 px-4 border-1 border-solid border-[#D9E1EC] placeholder-[#A1A7C4] text-black rounded-lg"
+            label="Country"
+            register={register}
+            options={[
+              { value: "us", label: "United States" },
+              { value: "ca", label: "Canada" },
+              { value: "uk", label: "United Kingdom" }
+            ]}
+            // defaultValue="us"
+            error={errors.country?.message}
           />
         </div>
+        
         <div className="my-5">
-          <label htmlFor="password" className="text-md text-[#5A607F]">
-            Password
-          </label>
-          <input
-            type="password"
-            {...register("password")}
-            id="password"
+          <InputField
+            label="Password"
             name="password"
+            register={register}
             placeholder="Enter password"
-            className="w-full py-3 px-4 border-1 border-solid border-[#D9E1EC] placeholder-[#A1A7C4] text-black rounded-lg"
-          />
-          {errors.password && (
-            <p className="text-red-500">{errors.password.message}</p>
-          )}
-        </div>
-
-        <div className="my-5">
-          <label htmlFor="passwordConfirm" className="text-md text-[#5A607F]">
-            Confirm Password
-          </label>
-          <input
             type="password"
-            {...register("passwordConfirm")}
-            id="passwordConfirm"
-            name="passwordConfirm"
-            placeholder="Confirm password"
-            className="w-full py-3 px-4 border-1 border-solid border-[#D9E1EC] placeholder-[#A1A7C4] text-black rounded-lg"
+            error={errors.password?.message}
           />
-          {errors.passwordConfirm && (
-            <p className="text-red-500">{errors.passwordConfirm.message}</p>
-          )}
         </div>
-        <button
+        
+        <div className="my-5">
+          <InputField
+            label="Confirm Password"
+            name="passwordConfirm"
+            register={register}
+            placeholder="Confirm password"
+            type="password"
+            error={errors.passwordConfirm?.message}
+          />
+        </div>
+        
+        <Button
           type="submit"
-          className="bg-gradient-to-r from-[#E67002] to-[#992002] text-white text-2xl w-full py-3
-          rounded-2xl mt-5 max-w-177 mx-auto block cursor-pointer
-          "
+          disabled={isSubmitting}
+          isLoading={isSubmitting}
+          loadingText="Processing..."
         >
-          Complete
-        </button>
+          Create Account
+        </Button>
       </form>
     </div>
   );
