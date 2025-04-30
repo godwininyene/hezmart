@@ -38,11 +38,11 @@ const InputField = ({
           <InputComponent
             type={type}
             id={name}
-            {...(register ? register(name) : {})}
+            {...register(name)}
             placeholder={placeholder}
             className={inputClasses}
             required={isRequired}
-            onChange={onChange}
+            // onChange={onChange}
             rows={as === "textarea" ? 3 : undefined}
           />
           {icon && <div className="absolute right-3 top-3.5 text-gray-400">{icon}</div>}

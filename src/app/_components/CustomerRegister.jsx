@@ -3,11 +3,12 @@ import React from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import Link from 'next/link';
 import InputField from './common/InputField';
 import SelectField from './common/SelectField';
 import Button from './common/Button';
 import axios from '../../lib/axios';
+import { useRouter } from 'next/navigation';
+
 
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
@@ -15,20 +16,40 @@ const customerRegisterSchema = z
   .object({
     firstName: z.string().trim().min(2, "Must be at least 2 characters"),
     lastName: z.string().trim().min(2, "Must be at least 2 characters"),
-    email: z.string().trim().email("Please enter a valid email address"),
-    primaryPhone: z.string().trim().min(6, "Must be a minimum of 6 characters"),
-    secondaryPhone: z.string().trim().min(6, "Must be a minimum of 6 characters").optional(),
-    primaryAddress: z.string().trim().min(6, "Must be a minimum of 6 characters"),
-    secondaryAddress: z.string().trim().min(6, "Must be a minimum of 6 characters").optional(),
+    email: z
+      .string()
+      .trim()
+      .min(1, "Email is required")
+      .regex(
+        /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+        "Please enter a valid email address"
+      ),
+    primaryPhone: z
+      .string()
+      .trim()
+      .min(6, "Must be a minimum of 6 characters"),
+    secondaryPhone: z
+      .string()
+      .trim()
+      .min(6, "Must be a minimum of 6 characters")
+      .optional()
+      .or(z.literal("")), // allows an empty string
+    primaryAddress: z
+      .string()
+      .trim()
+      .min(6, "Must be a minimum of 6 characters"),
+    secondaryAddress: z
+      .string()
+      .trim()
+      .min(6, "Must be a minimum of 6 characters")
+      .optional()
+      .or(z.literal("")),
     city: z.string().trim().min(1, "It must not be empty"),
     region: z.string().trim().min(1, "It must not be empty"),
     country: z.string().trim().min(1, "It must not be empty"),
     password: z
       .string()
       .min(8, "Password must be at least 8 characters long"),
-      // .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-      // .regex(/[a-z]/, "Password must contain at least one lowercase letter")
-      // .regex(/[0-9]/, "Password must contain at least one number"),
     passwordConfirm: z.string(),
   })
   .refine((data) => data.password === data.passwordConfirm, {
@@ -36,51 +57,24 @@ const customerRegisterSchema = z
     path: ["passwordConfirm"],
   });
 
+
 function CustomerRegister() {
+  const router = useRouter();
+
 
   const {
     register,
     handleSubmit,
     setError,
     formState: { errors, isSubmitting },
-    watch,
-    control, 
-    getValues,
   } = useForm({
-    resolver: zodResolver(customerRegisterSchema),
-    defaultValues: {
-      firstName: '',
-      lastName: '',
-      email: '',
-      primaryPhone: '',
-      secondaryPhone: '',
-      primaryAddress: '',
-      secondaryAddress: '',
-      city: '',
-      region: '',
-      country: '', 
-      password: '',
-      passwordConfirm: '',
-    },
-    mode: 'onTouched',
+    resolver: zodResolver(customerRegisterSchema)
   });
 
-    // Use watch to monitor ALL fields
-    const watchAllFields = watch();
 
-
-  React.useEffect(() => {
-    console.log('Current errors:', errors);
-    console.log('Form values:', getValues()); 
-  }, [errors]);
-
-  
-
-  const onSubmit = async (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target)
+  const onSubmit = async (data) => {
     try {
-      const response = await axios.post('/api/v1/users/signup', formData);
+      const response = await axios.post('/api/v1/users/signup', data);
       
       if (response.data.status === 'success') {
         console.log("User successfully registered");
@@ -118,12 +112,7 @@ function CustomerRegister() {
 
   return (
     <div className="px-4 mt-9 border-solid border-2 border-gray-200 rounded-lg py-5 max-w-238">
-      <form  
-        onSubmit={(e) => {
-          e.preventDefault(); 
-          handleSubmit(onSubmit)(e);
-        }}
-      >
+      <form  onSubmit={handleSubmit(onSubmit)}>
         <h1 className="text-xl text-[#111111] font-semibold">
           Personal information
         </h1> 
