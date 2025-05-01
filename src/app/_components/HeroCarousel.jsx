@@ -26,7 +26,7 @@ const HeroCarousel = () => {
   return (
     <div className="relative w-full h-[550px] overflow-hidden col-span-9 row-span-12">
       {/* Text overlay */}
-      <h1 className="absolute top-10 left-0 right-0 text-center text-white text-4xl font-bold z-10">
+      <h1 className="absolute top-10 left-0 right-0 text-center text-white text-4xl lg:text-8xl font-bold z-10">
         Get Quality Products at Affordable Prices
       </h1>
 
@@ -71,7 +71,7 @@ const HeroCarousel = () => {
       </div>
 
       {/* Shop Now button */}
-      <button className="absolute bottom-50 left-1/2 transform -translate-x-1/2 px-8 py-3 text-white font-bold rounded-lg bg-gradient-to-r from-[#E67002] to-[#992002] hover:opacity-90 transition-opacity z-10">
+      <button className="absolute bottom-40 left-1/2 transform -translate-x-1/2 px-8 py-3 text-white font-bold rounded-lg bg-gradient-to-r from-[#E67002] to-[#992002] hover:opacity-90 transition-opacity z-10">
         Shop Now
       </button>
     </div>

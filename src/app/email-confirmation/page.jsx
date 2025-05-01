@@ -3,8 +3,11 @@ import React from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { useRouter } from "next/navigation";
-import Link from 'next/link'
+import Image from 'next/image';
+import mail from '../../../public/mail.svg';
+import Link from 'next/link';
+import InputField from "../_components/common/InputField";
+
 const verifySchema = z.object({
   verify: z
     .number()
@@ -33,8 +36,9 @@ function Page() {
         className="bg-white max-w-135 border-1 border-solid border-[#D9E1EC] shadow-sm
       lg:px-15 py-12 px-4"
       >
+        <Image src={mail} width={150} height={150} className="block mx-auto" />
         <h1 className="text-2xl text-[#131523] font-bold text-center mb-2">
-          Confirm Email
+          Almost There!
         </h1>
         <p className="text-[#5A607F] text-sm text-center mb-8">
           Check Your Email and Enter Confirmation Code
@@ -59,15 +63,13 @@ function Page() {
           className="bg-gradient-to-r from-[#E67002] to-[#992002] text-white text-2xl w-full py-3
           rounded-2xl mt-5 mx-auto block"
         >
-          <Link href="/reg-complete">
-            Confirm Email
-          </Link>
+          <Link href="/reg-complete">Confirm Email</Link>
         </button>
         <hr className="text-[#D7DBEC] my-8" />
         <button
           type="submit"
           className="text-white text-2xl w-full py-3 border-1 border-solid border-[#D7DBEC]
-          rounded-2xl mt-5 mx-auto block"
+          rounded-2xl mt-5 mx-auto block "
         >
           <Link
             href="/"
